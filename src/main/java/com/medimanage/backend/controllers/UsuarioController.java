@@ -47,7 +47,7 @@ public class UsuarioController {
             return ResponseEntity.ok(usuarioOpt.get());
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Credenciales inválidas. Verifica tu usuario o contraseña"));
+                    .body(Map.of("error", "Credenciales inválidas. Verifica tu correo o contraseña"));
         }
     }
 }

@@ -20,8 +20,8 @@ public class Usuario {
     @Column(name = "nombre_usuario", nullable = false, unique = true, length = 50)
     private String nombreUsuario;
 
-    @Column(name = "password_hash", nullable = false, length = 255)
-    private String passwordHash;
+    @Column(name = "password", nullable = false, length = 255)
+    private String password;
 
     @Column(name = "nombre_completo", nullable = false, length = 100)
     private String nombreCompleto;

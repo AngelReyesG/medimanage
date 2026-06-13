@@ -10,6 +10,5 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     //Metodo personalizado para inicio de sesión
     Optional<Usuario> findByNombreUsuario(String nombreUsuario);
-    Optional<Usuario> findByCorreo(String correo);
     Optional<Usuario> findByPassword(String passwordHash);
 }
