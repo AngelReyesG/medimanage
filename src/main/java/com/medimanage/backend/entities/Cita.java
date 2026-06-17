@@ -32,14 +32,14 @@ public class Cita {
     private LocalDateTime fechaHora;
 
     @Column(nullable = false, length = 255)
-    private String motiivo;
+    private String motivo;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EstadoCita estado = EstadoCita.PENDIENTE;
 
-    @Column(name = "fecha_creación", updatable = false, insertable = false,
-            columnDefinition = "TIMESTAMP DEFAULT_CURRENT TIMESTAMP")
+    @Column(name = "fecha_creacion", updatable = false, insertable = false,
+            columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime fechaCreacion;
 
     public enum EstadoCita {
