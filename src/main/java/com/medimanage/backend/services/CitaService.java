@@ -1,61 +1,95 @@
 package com.medimanage.backend.services;
 
+import com.medimanage.backend.dtos.CitaRequestDTO;
 import com.medimanage.backend.entities.Cita;
+import com.medimanage.backend.entities.Paciente;
+import com.medimanage.backend.entities.Usuario;
 import com.medimanage.backend.repositories.CitaRepository;
+import com.medimanage.backend.repositories.PacienteRepository;
+import com.medimanage.backend.repositories.UsuarioRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CitaService {
 
-    private final CitaRepository citaRepository;
+    @Autowired
+    private CitaRepository citaRepository;
 
-    //Inyeccion por contructor
-    public CitaService(CitaRepository citaRepository) {
-        this.citaRepository = citaRepository;
-    }
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
-    //Agendar una nueva cita con validación
-    public Cita agendarCita(Cita cita) {
-        if (cita.getFechaHora().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("No se puede agendar una cita en una fecha u hora pasada.");
-        }
-        //Asignar estado inicial de forma segura
-        if (cita.getEstado() == null) {
-            cita.setEstado(Cita.EstadoCita.PENDIENTE);
-        }
-        return citaRepository.save(cita);
-    }
+    @Autowired
+    private PacienteRepository pacienteRepository;
 
     //Obtener todas las citas
     public List<Cita> obtenerTodas() {
-        return citaRepository.findAll();
-    }
-
-    //Buscar cita por ID
-    public Optional<Cita> obtenerPorId(long id) {
-        return citaRepository.findById(id);
+        return citaRepository.findAll().stream()
+                .filter(cita -> !cita.getEstado().equals("ELIMINADA"))
+                .collect(Collectors.toList());
     }
 
     //Obtener agenda completa de un médico
     public List<Cita> obtenerCitasPorMedico(Long idUsuario) {
-        return citaRepository.findByMedicoIdUsuario(idUsuario);
+        return citaRepository.findByIdUsuario(idUsuario).stream()
+                .filter(cita -> !cita.getEstado().equals("ELIMINADA"))
+                .collect(Collectors.toList());
     }
 
-    //Pbtener el historial clínico de citas de un paciente
+    //Buscar cita por ID
+    public Optional<Cita> obtenerPorId(long id) {
+        return citaRepository.findById(id)
+                .filter(cita -> !cita.getEstado().equals("ELIMINADA"));
+    }
+
+    //Agendar una nueva cita con validación
+    public Cita agendarCita(CitaRequestDTO dto) {
+        //Validar que exista el médico
+        Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
+                .orElseThrow(() -> new RuntimeException("Médico no encontrado con ID: " + dto.getUsuarioId()));
+
+        //Validar que exista el paciente
+        Paciente paciente = pacienteRepository.findById(dto.getPacienteId())
+                .orElseThrow(() -> new RuntimeException("Paciente no encontrado con ID: " + dto.getPacienteId()));
+
+        //Crear estructura de Cita
+        Cita cita = new Cita();
+        cita.setUsuario(usuario);
+        cita.setPaciente(paciente);
+        cita.setFechaHora(dto.getFechaHora());
+        cita.setMotivo(dto.getMotivo());
+        cita.setEstado("PENDIENTE");
+
+        return citaRepository.save(cita);
+    }
+
+    //Cambiar estado de una cita
+    public Optional<Cita> cambiarEstado(Long id, String nuevoEstado) {
+        return citaRepository.findById(id)
+                .filter(cita -> !cita.getEstado().equals("ELIMINADA"))
+                .map( cita -> {
+                    cita.setEstado(nuevoEstado.toUpperCase());
+                    return citaRepository.save(cita);
+                });
+    }
+
+    //Obtener el historial clínico de citas de un paciente
     public List<Cita> obtenerHistorialPaciente(Long idPaciente) {
-        return citaRepository.findByPacienteIdPaciente(idPaciente);
+        return citaRepository.findByIdPaciente(idPaciente).stream()
+                .filter(cita ->!cita.getEstado().equals("ELIMINADA"))
+                .collect(Collectors.toList());
     }
 
     //Cancelar una cita
-    public Cita cancelarCita(Long id) {
+    public boolean cancelarCita(Long id) {
         return citaRepository.findById(id).map(cita -> {
-            cita.setEstado(Cita.EstadoCita.CANCELADA);
-            return citaRepository.save(cita);
-        }).orElseThrow(() -> new IllegalArgumentException("La cita con el ID especificado no existe."));
+            cita.setEstado("ELIMINADA");
+            citaRepository.save(cita);
+            return true;
+        }).orElse(false);
     }
 }

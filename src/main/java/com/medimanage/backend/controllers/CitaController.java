@@ -1,44 +1,47 @@
 package com.medimanage.backend.controllers;
 
+import com.medimanage.backend.dtos.CitaRequestDTO;
 import com.medimanage.backend.entities.Cita;
 import com.medimanage.backend.services.CitaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/citas")
-@CrossOrigin(origins = "*")
 public class CitaController {
 
-    private final CitaService citaService;
+    @Autowired
+    private CitaService citaService;
 
-    public CitaController(CitaService citaService) {
-        this.citaService = citaService;
+    //Obtener todas las citas o filtrar por médico
+    @GetMapping
+    public ResponseEntity<List<Cita>> listarCitas(@RequestParam(required = false) Long idUsuario) {
+        if (idUsuario != null) {
+            return ResponseEntity.ok(citaService.obtenerCitasPorMedico(idUsuario));
+        }
+        return ResponseEntity.ok(citaService.obtenerTodas());
     }
 
     //Agendar una nueva cita
     @PostMapping
-    public ResponseEntity<?> agendarCita(@RequestBody Cita cita) {
+    public ResponseEntity<?> agendarCita(@RequestBody CitaRequestDTO dto) {
         try {
-            Cita nuevaCita = citaService.agendarCita(cita);
-            return new ResponseEntity<>(nuevaCita, HttpStatus.CREATED);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            Cita nuevaCita = citaService.agendarCita(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevaCita);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-    //Obtener todas las citas
-    @GetMapping
-    public ResponseEntity<List<Cita>> obtenerTodas() {
-        return ResponseEntity.ok(citaService.obtenerTodas());
-    }
-
-    //Obtener la agenda de un médico específico
-    @GetMapping("/medico/{medicoId}")
-    public ResponseEntity<List<Cita>> obtenerPorMedico(@PathVariable Long medicoId) {
-        return ResponseEntity.ok(citaService.obtenerCitasPorMedico(medicoId));
+    //Actualizar el estado de la cita (PENDIENTE -> COMPLETADA / CANCELADA)
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity<Cita> cambiarEstado(@PathVariable Long id, @RequestParam String nuevoEstado) {
+        return citaService.cambiarEstado(id, nuevoEstado)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     //Obtener historial de un paciente específico
@@ -47,14 +50,12 @@ public class CitaController {
         return ResponseEntity.ok(citaService.obtenerHistorialPaciente(pacienteId));
     }
 
-    //Cancelación lógica de una cita por ID
-    @PutMapping("/{id}/cancelar")
-    public ResponseEntity<?> cancelarCita(@PathVariable Long id) {
-        try {
-            Cita citaCancelada = citaService.cancelarCita(id);
-            return ResponseEntity.ok(citaCancelada);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    //Eliminiación lógica de una cita por ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarCita(@PathVariable Long id) {
+        if (citaService.cancelarCita(id)) {
+            return ResponseEntity.noContent().build();
         }
+        return ResponseEntity.notFound().build();
     }
 }

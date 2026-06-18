@@ -57,7 +57,7 @@ public class PacienteController {
     public ResponseEntity<Void> eliminarPaciente(@PathVariable Long id) {
         if (pacienteService.eliminarPaciente(id)) {
             return ResponseEntity.noContent().build();
-        }
+    }
         return ResponseEntity.notFound().build();
     }
 }

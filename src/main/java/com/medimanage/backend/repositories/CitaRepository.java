@@ -2,6 +2,8 @@ package com.medimanage.backend.repositories;
 
 import com.medimanage.backend.entities.Cita;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
@@ -9,8 +11,10 @@ import java.util.List;
 public interface CitaRepository extends JpaRepository<Cita, Long> {
 
     //Mostrar al medico su agenda del día
-    List<Cita> findByMedicoIdUsuario(Long idUsuario);
+    @Query("SELECT c FROM Cita c WHERE c.usuario.idUsuario = :idUsuario")
+    List<Cita> findByIdUsuario(@Param("idUsuario") Long idUsuario);
 
     //Ver historial de citas de un paciente
-    List<Cita> findByPacienteIdPaciente(Long idPaciente);
+    @Query("SELECT c FROM Cita c WHERE c.paciente.idPaciente = :idPaciente")
+    List<Cita> findByIdPaciente(@Param("idPaciente") Long idPaciente);
 }

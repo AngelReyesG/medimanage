@@ -3,19 +3,19 @@ package com.medimanage.backend.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.context.i18n.LocaleContextThreadLocalAccessor;
-
+import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
+import org.springframework.context.i18n.LocaleContextThreadLocalAccessor;
 
 @Entity
 @Table(name = "citas")
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class Cita {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_cita")
     private Long idCita;
 
     //Relacion con Paciente
@@ -24,28 +24,20 @@ public class Cita {
     private Paciente paciente;
 
     //Relacion con el usuario
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_medico", nullable = false)
-    private Usuario medico;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private Usuario usuario;
 
-    @Column(name = "fecha_hora", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime fechaHora;
 
-    @Column(nullable = false, length = 255)
+    @Column(length = 255)
     private String motivo;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private EstadoCita estado = EstadoCita.PENDIENTE;
 
     @Column(name = "fecha_creacion", updatable = false, insertable = false,
             columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime fechaCreacion;
 
-    public enum EstadoCita {
-        PENDIENTE,
-        CONFIRMADA,
-        ASISTIO,
-        CANCELADA
-    }
+    @Column(nullable = false)
+    private String estado;
 }
