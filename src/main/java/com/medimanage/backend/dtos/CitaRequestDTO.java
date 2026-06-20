@@ -1,6 +1,10 @@
 package com.medimanage.backend.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,11 +14,19 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CitaRequestDTO {
+
+    @NotNull(message = "El ID del médico es obligatorio.")
     private Long usuarioId;
+
+    @NotNull(message = "El ID del paciente es obligatorio.")
     private Long pacienteId;
 
+    @NotNull(message = "La fecha y hora de la cita son obligatorias.")
+    @Future(message = "La fecha y hora de la cita deben ser en el futuro.")
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime fechaHora;
 
+    @NotBlank(message = "El motivo de la cita es obligatorio.")
+    @Size(min = 5, max = 255, message = "El motivio debe tener entre 5 y 255 caracteres")
     private String motivo;
 }

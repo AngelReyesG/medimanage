@@ -3,6 +3,7 @@ package com.medimanage.backend.controllers;
 import com.medimanage.backend.dtos.CitaRequestDTO;
 import com.medimanage.backend.entities.Cita;
 import com.medimanage.backend.services.CitaService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,8 +27,8 @@ public class CitaController {
     }
 
     //Agendar una nueva cita
-    @PostMapping
-    public ResponseEntity<?> agendarCita(@RequestBody CitaRequestDTO dto) {
+    @PostMapping ("/registrar")
+    public ResponseEntity<?> agendarCita(@Valid @RequestBody CitaRequestDTO dto) {
         try {
             Cita nuevaCita = citaService.agendarCita(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevaCita);

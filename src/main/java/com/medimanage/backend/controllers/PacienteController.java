@@ -3,6 +3,7 @@ package com.medimanage.backend.controllers;
 import com.medimanage.backend.entities.Paciente;
 import com.medimanage.backend.dtos.PacienteRequestDTO;
 import com.medimanage.backend.services.PacienteService;
+import jakarta.validation.Valid;
 import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +22,8 @@ public class PacienteController {
     }
 
     //Registrar nuevo paciente
-    @PostMapping
-    public ResponseEntity<Paciente> registrarPaciente(@RequestBody PacienteRequestDTO dto) {
+    @PostMapping("/registrar")
+    public ResponseEntity<Paciente> registrarPaciente(@Valid @RequestBody PacienteRequestDTO dto) {
         Paciente nuevoPaciente = pacienteService.registrarPaciente(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPaciente);
     }
@@ -46,7 +47,7 @@ public class PacienteController {
 
     //Actualizar un paciente existente
     @PutMapping("/{id}")
-    public ResponseEntity<Paciente> actualizarPaciente(@PathVariable Long id, @RequestBody PacienteRequestDTO dto) {
+    public ResponseEntity<Paciente> actualizarPaciente(@Valid @PathVariable Long id, @RequestBody PacienteRequestDTO dto) {
         return pacienteService.actualizarPaciente(id, dto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
