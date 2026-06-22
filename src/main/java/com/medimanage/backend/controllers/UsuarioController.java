@@ -34,14 +34,14 @@ public class UsuarioController {
     //Login
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
-        String usuario = credenciales.get("usuario");
+        String email = credenciales.get("email");
         String password = credenciales.get("password");
 
-        if (usuario == null || password == null) {
+        if (email == null || password == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "El usuario y la contraseña son requeridos"));
         }
 
-        Optional<Usuario> usuarioOpt = usuarioService.autenticar(usuario, password);
+        Optional<Usuario> usuarioOpt = usuarioService.autenticar(email, password);
 
         if (usuarioOpt.isPresent()) {
             return ResponseEntity.ok(usuarioOpt.get());

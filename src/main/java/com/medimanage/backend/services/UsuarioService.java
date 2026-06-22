@@ -17,7 +17,7 @@ public class UsuarioService {
 
     //Registrar un nuevo usuario
     public Usuario registrarUsuario(Usuario usuario) {
-        Optional<Usuario> usuarioExistente = usuarioRepository.findByNombreUsuario(usuario.getNombreUsuario());
+        Optional<Usuario> usuarioExistente = usuarioRepository.findByEmail(usuario.getEmail());
         if (usuarioExistente.isPresent()) {
             throw new IllegalArgumentException("El usuario ya se encuentra registrado.");
         }
@@ -27,7 +27,7 @@ public class UsuarioService {
 
     //Login
     public Optional<Usuario> autenticar(String usernameInput, String passwordInput) {
-        return usuarioRepository.findByNombreUsuario(usernameInput)
+        return usuarioRepository.findByEmail(usernameInput)
                 .filter(u-> u.getPassword().equals(passwordInput));
     }
 }
