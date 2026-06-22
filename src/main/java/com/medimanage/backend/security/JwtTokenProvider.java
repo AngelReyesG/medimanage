@@ -34,7 +34,7 @@ public class JwtTokenProvider {
     }
 
     //Extraer correo del usuario contenido dentro del token
-    public String obtenerCorreoDelJwt(String token) {
+    public String obtenerEmailDelJwt(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
