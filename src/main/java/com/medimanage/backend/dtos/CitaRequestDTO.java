@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CitaRequestDTO {
 
-    @NotNull(message = "El ID del médico es obligatorio.")
     private Long usuarioId;
 
     @NotNull(message = "El ID del paciente es obligatorio.")

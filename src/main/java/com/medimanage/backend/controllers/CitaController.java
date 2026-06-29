@@ -2,6 +2,7 @@ package com.medimanage.backend.controllers;
 
 import com.medimanage.backend.dtos.CitaRequestDTO;
 import com.medimanage.backend.entities.Cita;
+import com.medimanage.backend.enums.EstadoCita;
 import com.medimanage.backend.services.CitaService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -19,30 +20,28 @@ public class CitaController {
 
     //Obtener todas las citas o filtrar por médico
     @GetMapping
-    public ResponseEntity<List<Cita>> listarCitas(@RequestParam(required = false) Long idUsuario) {
-        if (idUsuario != null) {
-            return ResponseEntity.ok(citaService.obtenerCitasPorMedico(idUsuario));
-        }
-        return ResponseEntity.ok(citaService.obtenerTodas());
+    public ResponseEntity<List<Cita>> listarCitas() {
+        return ResponseEntity.ok(citaService.obtenerCitasPorMedico());
+    }
+
+    //Obtener citas por ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Cita> obtenerPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(citaService.obtenerPorId(id));
     }
 
     //Agendar una nueva cita
     @PostMapping ("/registrar")
-    public ResponseEntity<?> agendarCita(@Valid @RequestBody CitaRequestDTO dto) {
-        try {
-            Cita nuevaCita = citaService.agendarCita(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nuevaCita);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<Cita> agendarCita(@Valid @RequestBody CitaRequestDTO dto) {
+        Cita nuevaCita = citaService.agendarCita(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevaCita);
     }
 
-    //Actualizar el estado de la cita (PENDIENTE -> COMPLETADA / CANCELADA)
+    //Actualizar el estado de la cita
     @PatchMapping("/{id}/estado")
-    public ResponseEntity<Cita> cambiarEstado(@PathVariable Long id, @RequestParam String nuevoEstado) {
-        return citaService.cambiarEstado(id, nuevoEstado)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Cita> cambiarEstado(@PathVariable Long id, @RequestParam EstadoCita nuevoEstado) {
+        Cita citaModificada = citaService.cambiarEstado(id, nuevoEstado);
+        return ResponseEntity.ok(citaModificada);
     }
 
     //Obtener historial de un paciente específico
@@ -54,9 +53,7 @@ public class CitaController {
     //Eliminiación lógica de una cita por ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarCita(@PathVariable Long id) {
-        if (citaService.cancelarCita(id)) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        citaService.cancelarCita(id);
+        return ResponseEntity.noContent().build();
     }
 }

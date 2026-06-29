@@ -39,5 +39,5 @@ public class Cita {
     private LocalDateTime fechaCreacion;
 
     @Column(nullable = false)
-    private String estado;
+    private Enum estado;
 }
