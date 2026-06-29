@@ -1,7 +1,10 @@
 package com.medimanage.backend.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.LocalDate;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,8 +31,11 @@ public class PacienteRequestDTO {
     @Email(message = "Formato de correo no válido.")
     private String correo;
 
-    @NotBlank(message = "La fecha de nacimiento es olbigatoria")
-    private String fechaNacimiento;
+    @NotNull(message = "La fecha de nacimiento es olbigatoria")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate fechaNacimiento;
 
     private String historialClinico;
+
+    private String notasAlergias;
 }

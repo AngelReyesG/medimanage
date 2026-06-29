@@ -24,7 +24,15 @@ public class PacienteController {
     //Registrar nuevo paciente
     @PostMapping("/registrar")
     public ResponseEntity<Paciente> registrarPaciente(@Valid @RequestBody PacienteRequestDTO dto) {
-        Paciente nuevoPaciente = pacienteService.registrarPaciente(dto);
+        Paciente paciente = new Paciente();
+
+        paciente.setNombre(dto.getNombre());
+        paciente.setApellidos(dto.getApellidos());
+        paciente.setTelefono(dto.getTelefono());
+        paciente.setCorreo(dto.getCorreo());
+        paciente.setFechaNacimiento(dto.getFechaNacimiento());
+
+        Paciente nuevoPaciente = pacienteService.registrarPaciente(paciente);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPaciente);
     }
 
@@ -40,25 +48,33 @@ public class PacienteController {
     //Busca paciente por ID
     @GetMapping("/{id}")
     public ResponseEntity<Paciente> obtenerPorId(@PathVariable Long id) {
-        return pacienteService.obtenerPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+
+        Paciente paciente = pacienteService.obtenerPorId(id);
+
+        return ResponseEntity.ok(paciente);
     }
 
     //Actualizar un paciente existente
     @PutMapping("/{id}")
     public ResponseEntity<Paciente> actualizarPaciente(@Valid @PathVariable Long id, @RequestBody PacienteRequestDTO dto) {
-        return pacienteService.actualizarPaciente(id, dto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+
+        Paciente datosActualizados = new Paciente();
+        datosActualizados.setNombre(dto.getNombre());
+        datosActualizados.setApellidos(dto.getApellidos());
+        datosActualizados.setTelefono(dto.getTelefono());
+        datosActualizados.setCorreo(dto.getCorreo());
+        datosActualizados.setFechaNacimiento(dto.getFechaNacimiento());
+        datosActualizados.setNotasAlergias(dto.getNotasAlergias());
+        datosActualizados.setHistorialClinico(dto.getHistorialClinico());
+
+        Paciente pacienteModificado = pacienteService.actualizarPaciente(id, datosActualizados);
+        return ResponseEntity.ok(pacienteModificado);
     }
 
     //Eliminar paciente
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarPaciente(@PathVariable Long id) {
-        if (pacienteService.eliminarPaciente(id)) {
-            return ResponseEntity.noContent().build();
-    }
-        return ResponseEntity.notFound().build();
+        pacienteService.eliminarPaciente(id);
+        return ResponseEntity.noContent().build();
     }
 }
