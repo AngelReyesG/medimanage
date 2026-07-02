@@ -26,4 +26,5 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
 
     boolean existsByUsuarioAndFechaHoraAndEstadoNot(Usuario usuario, LocalDateTime fechaHora, EstadoCita estado);
 
+    long countByFechaHoraBetween(LocalDateTime inicio, LocalDateTime fin);
 }
