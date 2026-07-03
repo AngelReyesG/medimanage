@@ -4,7 +4,6 @@ import com.medimanage.backend.entities.Paciente;
 import com.medimanage.backend.dtos.PacienteRequestDTO;
 import com.medimanage.backend.services.PacienteService;
 import jakarta.validation.Valid;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +37,8 @@ public class PacienteController {
 
     //Buscar paciente por nombre
     @GetMapping
-    public ResponseEntity<List<Paciente>> obtenerPacientes(@RequestParam(required = false) String nombre) {
+    public ResponseEntity<List<Paciente>> obtenerPacientes(
+            @RequestParam(value = "nombre", required = false, defaultValue = "") String nombre) {
         if (nombre != null && !nombre.trim().isEmpty()) {
             return ResponseEntity.ok(pacienteService.buscarPorNombre(nombre));
         }
