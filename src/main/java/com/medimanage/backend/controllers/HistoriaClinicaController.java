@@ -17,9 +17,13 @@ public class HistoriaClinicaController {
         this.historiaClinicaService = historiaClinicaService;
     }
 
-    @GetMapping("/pacientes/{pacienteId}")
-    public ResponseEntity<HistoriaClinica> obtenerPorPaciente(@PathVariable Long pacienteId) {
-        return ResponseEntity.ok(historiaClinicaService.obtenerPorPacienteId(pacienteId));
+    @GetMapping("/paciente/{idPaciente}")
+    public ResponseEntity<HistoriaClinica> obtenerPorPaciente(@PathVariable Long idPaciente) {
+        HistoriaClinica historia = historiaClinicaService.obtenerPorPacienteId(idPaciente);
+        if (historia != null) {
+            return ResponseEntity.ok(historia);
+        }
+        return ResponseEntity.ok(new HistoriaClinica());
     }
 
     @PutMapping("/paciente/{pacienteId}")
