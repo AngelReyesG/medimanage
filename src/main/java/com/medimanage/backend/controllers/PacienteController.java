@@ -1,11 +1,13 @@
 package com.medimanage.backend.controllers;
 
 import com.medimanage.backend.entities.Paciente;
+import com.medimanage.backend.entities.Usuario;
 import com.medimanage.backend.dtos.PacienteRequestDTO;
 import com.medimanage.backend.services.PacienteService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -21,8 +23,8 @@ public class PacienteController {
     }
 
     //Registrar nuevo paciente
-    @PostMapping("/registrar")
-    public ResponseEntity<Paciente> registrarPaciente(@Valid @RequestBody PacienteRequestDTO dto) {
+    @PostMapping
+    public ResponseEntity<Paciente> registrarPaciente(@Valid @RequestBody PacienteRequestDTO dto, @AuthenticationPrincipal Usuario usuarioAutenticado) {
         Paciente paciente = new Paciente();
 
         paciente.setNombre(dto.getNombre());
@@ -31,6 +33,7 @@ public class PacienteController {
         paciente.setCorreo(dto.getCorreo());
         paciente.setFechaNacimiento(dto.getFechaNacimiento());
 
+        paciente.setUsuario(usuarioAutenticado);
         Paciente nuevoPaciente = pacienteService.registrarPaciente(paciente);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPaciente);
     }
