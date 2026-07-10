@@ -32,6 +32,8 @@ public class PacienteController {
         paciente.setTelefono(dto.getTelefono());
         paciente.setCorreo(dto.getCorreo());
         paciente.setFechaNacimiento(dto.getFechaNacimiento());
+        paciente.setNotasAlergias(dto.getNotasAlergias());
+        paciente.setHistorialClinico(dto.getHistorialClinico());
 
         paciente.setUsuario(usuarioAutenticado);
         Paciente nuevoPaciente = pacienteService.registrarPaciente(paciente);
