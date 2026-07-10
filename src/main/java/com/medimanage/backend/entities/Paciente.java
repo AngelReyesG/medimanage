@@ -53,4 +53,7 @@ public class Paciente {
     @JoinColumn(name = "usuario_id", nullable = false)
     @JsonBackReference
     private Usuario usuario;
+
+    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private HistoriaClinica historiaClinica;
 }
