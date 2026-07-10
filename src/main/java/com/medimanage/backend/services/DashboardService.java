@@ -24,8 +24,8 @@ public class DashboardService {
 
         LocalDateTime inicioDia = hoy.atStartOfDay();
         LocalDateTime finDia = hoy.atTime(LocalTime.MAX);
-
         long citasHoy = citaRepository.countByFechaHoraBetween(inicioDia, finDia);
+
         long pacientesNuevos = pacienteRepository.countByFechaRegistroBetween(inicioDia, finDia);
 
         return new DashboardStatsDTO(citasHoy, pacientesNuevos);

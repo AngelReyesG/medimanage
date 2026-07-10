@@ -2,7 +2,6 @@ package com.medimanage.backend.controllers;
 
 import com.medimanage.backend.dtos.DashboardStatsDTO;
 import com.medimanage.backend.services.DashboardService;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/dashboard")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:5173")
 public class DashboardController {
 
     @Autowired

@@ -39,6 +39,7 @@ public class CitaController {
 
     //Actualizar el estado de la cita
     @PatchMapping("/{id}/estado")
+    @RequestMapping("/api/citas")
     public ResponseEntity<Cita> cambiarEstado(@PathVariable Long id, @RequestParam EstadoCita nuevoEstado) {
         Cita citaModificada = citaService.cambiarEstado(id, nuevoEstado);
         return ResponseEntity.ok(citaModificada);
