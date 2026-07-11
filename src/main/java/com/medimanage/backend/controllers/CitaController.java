@@ -32,7 +32,7 @@ public class CitaController {
     }
 
     //Agendar una nueva cita
-    @PostMapping ("/registrar")
+    @PostMapping
     public ResponseEntity<Cita> agendarCita(@Valid @RequestBody CitaRequestDTO dto) {
         Cita nuevaCita = citaService.agendarCita(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaCita);
@@ -43,6 +43,12 @@ public class CitaController {
     public ResponseEntity<Cita> cambiarEstado(@PathVariable Long id, @RequestParam EstadoCita nuevoEstado) {
         Cita citaModificada = citaService.cambiarEstado(id, nuevoEstado);
         return ResponseEntity.ok(citaModificada);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Cita> actualizarCita(@PathVariable Long id, @Valid @RequestBody CitaRequestDTO dto) {
+        Cita citaActualizada = citaService.actualizarCita(id, dto);
+        return ResponseEntity.ok(citaActualizada);
     }
 
     //Obtener historial de un paciente específico

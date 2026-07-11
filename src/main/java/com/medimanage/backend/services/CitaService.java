@@ -8,6 +8,7 @@ import com.medimanage.backend.enums.EstadoCita;
 import com.medimanage.backend.repositories.CitaRepository;
 import com.medimanage.backend.repositories.PacienteRepository;
 import com.medimanage.backend.repositories.UsuarioRepository;
+import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -98,6 +99,19 @@ public class CitaService {
         return citaRepository.save(cita);
     }
 
+    public Cita actualizarCita(Long id, CitaRequestDTO dto) {
+        Cita citaExistente = citaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("La cita con ID: " + id + " no existe"));
+
+        if (citaExistente.getEstado() == EstadoCita.COMPLETADA || citaExistente.getEstado() == EstadoCita.CANCELADA) {
+            throw new IllegalStateException("No se puede modificar una cita en estatus CANCELADA o COMPLETADA");
+        }
+
+        citaExistente.setMotivo(dto.getMotivo());
+        citaExistente.setFechaHora(dto.getFechaHora());
+
+        return citaRepository.save(citaExistente);
+    }
     //Obtener el historial clínico de citas de un paciente
     public List<Cita> obtenerHistorialPaciente(Long idPaciente) {
         return citaRepository.findByIdPaciente(idPaciente).stream()

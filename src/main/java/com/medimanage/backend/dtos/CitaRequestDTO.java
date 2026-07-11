@@ -22,7 +22,7 @@ public class CitaRequestDTO {
 
     @NotNull(message = "La fecha y hora de la cita son obligatorias.")
     @Future(message = "La fecha y hora de la cita deben ser en el futuro.")
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime fechaHora;
 
     @NotBlank(message = "El motivo de la cita es obligatorio.")
