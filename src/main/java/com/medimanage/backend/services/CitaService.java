@@ -12,7 +12,9 @@ import org.springframework.boot.context.config.ConfigDataResourceNotFoundExcepti
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,6 +30,9 @@ public class CitaService {
 
     @Autowired
     private PacienteRepository pacienteRepository;
+
+    @Autowired
+    private WhatsappService whatsappService;
 
     //Obtener médico autenticado desde token
     private Usuario obtenerMedicoAutenticado() {
@@ -92,6 +97,41 @@ public class CitaService {
        return citaRepository.save(cita);
     }
 
+    //Calcular horas libres para citas
+    public List<String> calcularHorariosLibres(LocalDate fecha) {
+        List<LocalTime> jornadaBase = List.of(
+                LocalTime.of(9, 0),
+                LocalTime.of(10, 0),
+                LocalTime.of(11, 0),
+                LocalTime.of(12, 0),
+                LocalTime.of(13, 0),
+                LocalTime.of(15, 0),
+                LocalTime.of(16, 0),
+                LocalTime.of(17, 0),
+                LocalTime.of(18, 0)
+        );
+
+        //Buscar citas existentes en BD para el día seleccionado
+        List<Cita> citasDelDia = citaRepository.findByFechaHoraBetween(
+                fecha.atStartOfDay(),
+                fecha.atTime(LocalTime.MAX)
+        );
+
+        //Extraer solo las horas que ya están ocupadas
+        List<LocalTime> horasOcupadas = citasDelDia.stream()
+                .filter(cita -> cita.getEstado() != EstadoCita.CANCELADA)
+                .map(cita -> cita.getFechaHora().toLocalTime())
+                .collect(Collectors.toList());
+
+        //Filtrar la jornada para únicamente dejar horas libres
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+
+        return jornadaBase.stream()
+                .filter(hora -> !horasOcupadas.contains(hora))
+                .map(hora -> hora.format(formatter))
+                .collect(Collectors.toList());
+    }
+
     //Cambiar estado de una cita
     public Cita cambiarEstado(Long id, EstadoCita nuevoEstado) {
         Cita cita = obtenerPorId(id);
@@ -118,7 +158,34 @@ public class CitaService {
                 .filter(cita ->!cita.getEstado().equals("ELIMINADA"))
                 .collect(Collectors.toList());
     }
+    // --- ESTATUS DE CITAS ---
 
+    //Confirmar cita solicitada
+    public Cita confirmarCita(Long id) {
+
+        Cita cita = obtenerPorId(id);
+
+        if(cita.getEstado() != EstadoCita.PENDIENTE) {
+            throw new RuntimeException("Esta cita ya ha sido procesada o no se encuentra en estado PENDIENTE.");
+        }
+
+        cita.setEstado(EstadoCita.CONFIRMADA);
+        Cita citaConfirmada = citaRepository.save(cita);
+
+        String fechaFormateada = citaConfirmada.getFechaHora().format(
+                DateTimeFormatter.ofPattern("dd/MM/yy 'a las' HH:mm 'hrs'")
+        );
+
+        //Enviar mensaje automático por API Whatsapp
+        whatsappService.enviarRecordatorioCita(
+                citaConfirmada.getPaciente().getTelefono(),
+                citaConfirmada.getPaciente().getNombre(),
+                fechaFormateada,
+                citaConfirmada.getMotivo()
+        );
+
+        return citaConfirmada;
+    }
     //Cancelar una cita
     public void cancelarCita(Long id) {
         Cita cita = obtenerPorId(id);

@@ -5,10 +5,12 @@ import com.medimanage.backend.entities.Cita;
 import com.medimanage.backend.enums.EstadoCita;
 import com.medimanage.backend.services.CitaService;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -32,10 +34,17 @@ public class CitaController {
     }
 
     //Agendar una nueva cita
-    @PostMapping
+    @PostMapping("/solicitar")
     public ResponseEntity<Cita> agendarCita(@Valid @RequestBody CitaRequestDTO dto) {
         Cita nuevaCita = citaService.agendarCita(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaCita);
+    }
+
+    //Aprobar cita
+    @PutMapping("/{id}/confirmar")
+    public ResponseEntity<Cita> confirmarCita(@PathVariable("id") Long id) {
+        Cita citaAprobada = citaService.confirmarCita(id);
+        return ResponseEntity.ok(citaAprobada);
     }
 
     //Actualizar el estado de la cita
@@ -55,6 +64,14 @@ public class CitaController {
     @GetMapping("/paciente/{pacienteId}")
     public ResponseEntity<List<Cita>> obtenerPorPaciente(@PathVariable Long pacienteId) {
         return ResponseEntity.ok(citaService.obtenerHistorialPaciente(pacienteId));
+    }
+
+    //Obtener horarios disponibles para agendar
+    @GetMapping("/horarios-disponibles")
+    public ResponseEntity<List<String>> getHorariosDisponibles(@RequestParam("fecha") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+
+        List<String> horasLibres = citaService.calcularHorariosLibres(fecha);
+        return ResponseEntity.ok(horasLibres);
     }
 
     //Eliminiación lógica de una cita por ID
