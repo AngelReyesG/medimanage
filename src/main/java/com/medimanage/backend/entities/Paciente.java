@@ -49,8 +49,8 @@ public class Paciente {
             columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime fechaRegistro;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = false)
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "usuario_id", nullable = true)
     @JsonBackReference
     private Usuario usuario;
 

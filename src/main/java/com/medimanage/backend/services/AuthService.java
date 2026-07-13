@@ -4,7 +4,6 @@ import com.medimanage.backend.dtos.LoginRequestDTO;
 import com.medimanage.backend.dtos.RegistroRequestDTO;
 import com.medimanage.backend.entities.Usuario;
 import com.medimanage.backend.repositories.UsuarioRepository;
-import org.hibernate.resource.jdbc.LogicalConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,9 +23,8 @@ public class AuthService {
         if(!passwordEncoder.matches(dto.getPassword(), usuario.getPassword())) {
             throw new RuntimeException("Credenciales incorrectas (Contraseña inválida).");
         }
-
         //Generar y retornar token JWT
-        return jwtTokenProvider.generarToken(usuario.getEmail());
+        return jwtTokenProvider.generarToken(usuario.getEmail(), usuario.getIdUsuario());
     }
     @Autowired
     private UsuarioRepository usuarioRepository;

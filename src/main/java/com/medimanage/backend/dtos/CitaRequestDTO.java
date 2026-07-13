@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -15,9 +17,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CitaRequestDTO {
 
-    private Long usuarioId;
+    private Long medicoId;
+    private String nombrePaciente;
+    private String apellidosPaciente;
+    private String correoPaciente;
+    private String telefonoPaciente;
+    private LocalDate fechaNacimiento;
 
-    @NotNull(message = "El ID del paciente es obligatorio.")
+    //@NotNull(message = "El ID del paciente es obligatorio.")
     private Long pacienteId;
 
     @NotNull(message = "La fecha y hora de la cita son obligatorias.")

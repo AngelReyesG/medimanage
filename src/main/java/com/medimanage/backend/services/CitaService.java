@@ -71,24 +71,46 @@ public class CitaService {
 
     //Agendar una nueva cita con validación
     public Cita agendarCita(CitaRequestDTO dto) {
-       Usuario medicoLogueado = obtenerMedicoAutenticado();
+        System.out.println("El medicoId recibido es: " + dto.getMedicoId());
+        Usuario medico;
+        if(dto.getMedicoId() != null) {
+            medico = usuarioRepository.findById(dto.getMedicoId())
+                    .orElseThrow(() -> new RuntimeException("Médico no encontrado con ID: " + dto.getMedicoId()));
+        } else {
+            medico = obtenerMedicoAutenticado();
+        }
 
-       Paciente paciente = pacienteRepository.findById(dto.getPacienteId())
-               .orElseThrow(() -> new RuntimeException("Paciente no encontrado con ID: " + dto.getPacienteId()));
+        Paciente paciente;
+        if (dto.getPacienteId() != null) {
 
-       if (!paciente.getUsuario().getIdUsuario().equals(medicoLogueado.getIdUsuario())) {
-           throw new RuntimeException("No puedes agendar citas a un paciente que no está registrado en tu consultorio.");
-       }
+            paciente = pacienteRepository.findById(dto.getPacienteId())
+                    .orElseThrow(() -> new RuntimeException("Paciente no encontrado con ID: " + dto.getPacienteId()));
+
+            if (dto.getMedicoId() == null && !paciente.getUsuario().getIdUsuario().equals(medico.getIdUsuario())) {
+                throw new RuntimeException("No puedes agendar citas a un paciente que no está registrado en tu consultorio.");
+            }
+        } else {
+
+            paciente = new Paciente();
+            paciente.setNombre(dto.getNombrePaciente());
+            paciente.setApellidos(dto.getApellidosPaciente() != null ? dto.getApellidosPaciente(): "No especificado");
+            paciente.setCorreo(dto.getCorreoPaciente());
+            paciente.setFechaNacimiento(dto.getFechaNacimiento());
+            paciente.setTelefono(dto.getTelefonoPaciente());
+            paciente.setUsuario(medico);
+
+            paciente = pacienteRepository.save(paciente);
+        }
 
        boolean horarioOcupado = citaRepository.existsByUsuarioAndFechaHoraAndEstadoNot(
-               medicoLogueado, dto.getFechaHora(), EstadoCita.CANCELADA);
+               medico, dto.getFechaHora(), EstadoCita.CANCELADA);
 
        if (horarioOcupado) {
            throw new RuntimeException("Ya cuentas con una cita programada para la fecha y hora seleccionada.");
        }
 
        Cita cita = new Cita();
-       cita.setUsuario(medicoLogueado);
+       cita.setUsuario(medico);
        cita.setPaciente(paciente);
        cita.setFechaHora(dto.getFechaHora());
        cita.setMotivo(dto.getMotivo());
@@ -98,7 +120,18 @@ public class CitaService {
     }
 
     //Calcular horas libres para citas
-    public List<String> calcularHorariosLibres(LocalDate fecha) {
+    public List<String> calcularHorariosLibres(LocalDate fecha, Long medicoId) {
+        Usuario medico = usuarioRepository.findById(medicoId)
+                .orElseThrow(() -> new RuntimeException("Médico no encontrado."));
+
+
+        //Buscar citas existentes en BD para el día seleccionado
+        List<Cita> citasDelDia = citaRepository.findByUsuarioAndFechaHoraBetween(
+                medico,
+                fecha.atStartOfDay(),
+                fecha.atTime(LocalTime.MAX)
+        );
+
         List<LocalTime> jornadaBase = List.of(
                 LocalTime.of(9, 0),
                 LocalTime.of(10, 0),
@@ -109,12 +142,6 @@ public class CitaService {
                 LocalTime.of(16, 0),
                 LocalTime.of(17, 0),
                 LocalTime.of(18, 0)
-        );
-
-        //Buscar citas existentes en BD para el día seleccionado
-        List<Cita> citasDelDia = citaRepository.findByFechaHoraBetween(
-                fecha.atStartOfDay(),
-                fecha.atTime(LocalTime.MAX)
         );
 
         //Extraer solo las horas que ya están ocupadas

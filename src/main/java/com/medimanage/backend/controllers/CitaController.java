@@ -5,6 +5,7 @@ import com.medimanage.backend.entities.Cita;
 import com.medimanage.backend.enums.EstadoCita;
 import com.medimanage.backend.services.CitaService;
 import jakarta.validation.Valid;
+import org.apache.coyote.Response;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -68,9 +69,10 @@ public class CitaController {
 
     //Obtener horarios disponibles para agendar
     @GetMapping("/horarios-disponibles")
-    public ResponseEntity<List<String>> getHorariosDisponibles(@RequestParam("fecha") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+    public ResponseEntity<List<String>> getHorariosDisponibles(@RequestParam("fecha") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
+                                                               @RequestParam("medicoId") Long medicoId) {
 
-        List<String> horasLibres = citaService.calcularHorariosLibres(fecha);
+        List<String> horasLibres = citaService.calcularHorariosLibres(fecha, medicoId);
         return ResponseEntity.ok(horasLibres);
     }
 
@@ -79,5 +81,32 @@ public class CitaController {
     public ResponseEntity<Void> eliminarCita(@PathVariable Long id) {
         citaService.cancelarCita(id);
         return ResponseEntity.noContent().build();
+    }
+
+    //Obtener solicitudes pendientes
+    @GetMapping("/solicitudes-pendientes")
+    public ResponseEntity<List<Cita>> obtenerSolicitudesPendientes() {
+        List<Cita> todasLasCitas = citaService.obtenerCitasPorMedico();
+
+        List<Cita> pendientes = todasLasCitas.stream()
+                .filter(cita -> cita.getEstado() == EstadoCita.PENDIENTE)
+                .collect(java.util.stream.Collectors.toList());
+
+        return ResponseEntity.ok(pendientes);
+    }
+
+    //Obtener agenda diaria
+    @GetMapping("/agenda-diaria")
+    public ResponseEntity<List<Cita>> obtenerAgendaDiaria(
+            @RequestParam("fecha") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha){
+
+        List<Cita> todasLasCitas = citaService.obtenerCitasPorMedico();
+
+        List<Cita> agendaDelDia = todasLasCitas.stream()
+                .filter(cita -> cita.getEstado() == EstadoCita.CONFIRMADA)
+                .filter(cita -> cita.getFechaHora().toLocalDate().equals(fecha))
+                .collect(java.util.stream.Collectors.toList());
+
+        return ResponseEntity.ok(agendaDelDia);
     }
 }

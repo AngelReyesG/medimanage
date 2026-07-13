@@ -48,6 +48,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/dashboard/**").authenticated()
                         .requestMatchers("/api/pacientes/**").authenticated()
+                        .requestMatchers("/api/citas/horarios-disponibles").permitAll()
+                        .requestMatchers("/api/citas/solicitar").permitAll()
                         .requestMatchers("/api/citas/**").authenticated()
                         .anyRequest().authenticated()
                 );

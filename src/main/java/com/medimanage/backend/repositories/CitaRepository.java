@@ -28,5 +28,5 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
 
     long countByFechaHoraBetween(LocalDateTime inicio, LocalDateTime fin);
 
-    List<Cita> findByFechaHoraBetween(LocalDateTime inicio, LocalDateTime fin);
+    List<Cita> findByUsuarioAndFechaHoraBetween(Usuario usuario, LocalDateTime inicio, LocalDateTime fin);
 }
